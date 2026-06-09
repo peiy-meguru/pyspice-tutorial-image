@@ -42,7 +42,7 @@ jobs:
             type=sha,prefix=,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push image
+      - name: Build and push PySpice image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -50,5 +50,28 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata for SkiDL image
+        id: meta_skidl
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/pyspice-skidl
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha,prefix=,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push SkiDL image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: skidl.Containerfile
+          push: true
+          tags: ${{ steps.meta_skidl.outputs.tags }}
+          labels: ${{ steps.meta_skidl.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
